@@ -9,9 +9,9 @@ go:
 env:
   - GOMAXPROCS=7
 
-branches:
-  only:
-    - master
+# branches:
+#   only:
+#     - master
 
 env:
   - CONSUL_VERSION=0.7.2
