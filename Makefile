@@ -6,7 +6,7 @@ CURRENT_DIR := $(CURRENT_DIR:/=)
 # Get the project metadata
 GOVERSION := 1.7.4
 VERSION := 0.3.1
-PROJECT := github.com/hashicorp/consul-replicate
+PROJECT := github.com/mrwulf/consul-replicate
 OWNER := $(dir $(PROJECT))
 OWNER := $(notdir $(OWNER:/=))
 NAME := $(notdir $(PROJECT))
