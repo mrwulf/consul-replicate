@@ -109,7 +109,7 @@ curl -sLo /dev/null -X PUT $ADDRESS_DC1/v1/kv/global/$EXCLUDED_KEY -d "test data
 sleep 3
 
 echo "    Checking key still exists in DC2"
-curl -sL $ADDRESS_DC2/v1/kv/backup/$EXCLUDED_KEY/nodelete | base64 -d | grep -q "don't delete"
+curl -sL $ADDRESS_DC2/v1/kv/backup/$EXCLUDED_KEY/nodelete | base64 -d | grep -q "XXZG9uJ3QgZGVsZXRl" || (curl -sL $ADDRESS_DC2/v1/kv/backup/$EXCLUDED_KEY/nodelete && exit 1)
 
 echo "##Test Case #2"
 echo "    Writing a key in DC2"

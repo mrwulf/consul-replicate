@@ -1,4 +1,4 @@
-package main // import "github.com/mrwulf/consul-replicate"
+package main
 
 import "os"
 
