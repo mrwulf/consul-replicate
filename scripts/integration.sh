@@ -108,7 +108,7 @@ curl -sLo /dev/null -X PUT $ADDRESS_DC1/v1/kv/global/$EXCLUDED_KEY -d "test data
 sleep 3
 
 echo "    Checking key still exists in DC2"
-curl -sL $ADDRESS_DC2/v1/kv/backup/$EXCLUDED_KEY/nodelete | grep -q "ZG9uJ3QgZGVsZXRl"
+curl -sL $ADDRESS_DC2/v1/kv/backup/$EXCLUDED_KEY/nodelete | base64 -d | grep -q "don't delete"
 
 rm -rf $DATADIR_DC1
 rm -rf $DATADIR_DC2
