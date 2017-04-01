@@ -205,7 +205,7 @@ func (r *Runner) Run() error {
 
 	// Replicate each prefix in a goroutine
 	for _, prefix := range prefixes {
-		go r.replicate(prefix, r.config.Excludes, doneCh, errCh)
+		go r.replicate(prefix, r.config.Excludes, r.config.ExclueMatches, doneCh, errCh)
 	}
 
 	var errs *multierror.Error
@@ -273,7 +273,7 @@ func (r *Runner) get(prefix *Prefix) (*watch.View, bool) {
 // replicate performs replication into the current datacenter from the given
 // prefix. This function is designed to be called via a goroutine since it is
 // expensive and needs to be parallelized.
-func (r *Runner) replicate(prefix *Prefix, excludes []*Exclude, doneCh chan struct{}, errCh chan error) {
+func (r *Runner) replicate(prefix *Prefix, excludes []*Exclude, excludematches []*ExcludeMatch, doneCh chan struct{}, errCh chan error) {
 	// Ensure we are not self-replicating
 	info, err := r.clients.Consul().Agent().Self()
 	if err != nil {
@@ -330,6 +330,22 @@ func (r *Runner) replicate(prefix *Prefix, excludes []*Exclude, doneCh chan stru
 			}
 
 			if excluded {
+				continue
+			}
+		}
+
+    // Ignore if the key falls under an exclude path match
+		if len(excludematches) > 0 {
+			excludematched := false
+			for _, excludematch := range excludematches {
+				if strings.Contains(pair.Path, excludematch.Source) {
+					log.Printf("[DEBUG] (runner) key %q contains %q, excluding",
+						pair.Path, excludematched.Source)
+					excludematched = true
+				}
+			}
+
+			if excludematched {
 				continue
 			}
 		}
@@ -394,6 +410,30 @@ func (r *Runner) replicate(prefix *Prefix, excludes []*Exclude, doneCh chan stru
 		}
 
 		if _, ok := usedKeys[key]; !ok && !excluded {
+			if _, err := kv.Delete(key, nil); err != nil {
+				errCh <- fmt.Errorf("failed to delete %q: %s", key, err)
+				return
+			}
+			log.Printf("[DEBUG] (runner) deleted %q", key)
+			deletes++
+		}
+	}
+  for _, key := range localKeys {
+		excludematched := false
+
+		// Ignore if the key falls under an excluded match path
+		if len(excludematches) > 0 {
+			sourceKey := strings.Replace(key, prefix.Destination, prefix.Source, -1)
+			for _, excludematch := range excludematches {
+				if strings.Contains(sourceKey, excludematch.Source) {
+					log.Printf("[DEBUG] (runner) key %q contains %q, excluding from deletes",
+						sourceKey, excludematch.Source)
+					excludematched = true
+				}
+			}
+		}
+
+		if _, ok := usedKeys[key]; !ok && !excludematched {
 			if _, err := kv.Delete(key, nil); err != nil {
 				errCh <- fmt.Errorf("failed to delete %q: %s", key, err)
 				return
