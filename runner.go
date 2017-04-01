@@ -205,7 +205,7 @@ func (r *Runner) Run() error {
 
 	// Replicate each prefix in a goroutine
 	for _, prefix := range prefixes {
-		go r.replicate(prefix, r.config.Excludes, r.config.ExclueMatches, doneCh, errCh)
+		go r.replicate(prefix, r.config.Excludes, r.config.ExcludeMatches, doneCh, errCh)
 	}
 
 	var errs *multierror.Error
@@ -340,7 +340,7 @@ func (r *Runner) replicate(prefix *Prefix, excludes []*Exclude, excludematches [
 			for _, excludematch := range excludematches {
 				if strings.Contains(pair.Path, excludematch.Source) {
 					log.Printf("[DEBUG] (runner) key %q contains %q, excluding",
-						pair.Path, excludematched.Source)
+						pair.Path, excludematch.Source)
 					excludematched = true
 				}
 			}
