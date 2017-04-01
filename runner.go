@@ -409,19 +409,7 @@ func (r *Runner) replicate(prefix *Prefix, excludes []*Exclude, excludematches [
 			}
 		}
 
-		if _, ok := usedKeys[key]; !ok && !excluded {
-			if _, err := kv.Delete(key, nil); err != nil {
-				errCh <- fmt.Errorf("failed to delete %q: %s", key, err)
-				return
-			}
-			log.Printf("[DEBUG] (runner) deleted %q", key)
-			deletes++
-		}
-	}
-  for _, key := range localKeys {
-		excludematched := false
-
-		// Ignore if the key falls under an excluded match path
+    // Ignore if the key falls under an excluded match path
 		if len(excludematches) > 0 {
 			sourceKey := strings.Replace(key, prefix.Destination, prefix.Source, -1)
 			for _, excludematch := range excludematches {
@@ -433,7 +421,7 @@ func (r *Runner) replicate(prefix *Prefix, excludes []*Exclude, excludematches [
 			}
 		}
 
-		if _, ok := usedKeys[key]; !ok && !excludematched {
+		if _, ok := usedKeys[key]; !ok && !excluded && !excludematched {
 			if _, err := kv.Delete(key, nil); err != nil {
 				errCh <- fmt.Errorf("failed to delete %q: %s", key, err)
 				return
