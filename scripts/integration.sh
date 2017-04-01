@@ -90,6 +90,7 @@ $CONSUL_REPLICATE_BIN \
   -consul $ADDRESS_DC2 \
   -prefix "global@dc1:backup" \
   -exclude "global/$EXCLUDED_KEY" \
+  -excludematch "excluded_" \
   -log-level $LOG_LEVEL &
 CONSUL_REPLICATE_PID=$!
 sleep 3
@@ -113,7 +114,7 @@ curl -sL $ADDRESS_DC2/v1/kv/backup/$EXCLUDED_KEY/nodelete | grep -q "ZG9uJ3QgZGV
 
 echo "##Test Case #2"
 echo "    Writing a key in DC2"
-curl -sLo /dev/null -X PUT $ADDRESS_DC2/v1/kv/backup/testkey -d "don't delete"
+curl -sLo /dev/null -X PUT $ADDRESS_DC2/v1/kv/backup/excluded_key -d "don't delete"
 sleep 3
 
 echo "    Updating prefix in DC1"
@@ -121,7 +122,7 @@ curl -sLo /dev/null -X PUT $ADDRESS_DC1/v1/kv/global/parent_folder/other_folder/
 sleep 3
 
 echo "    Checking key still exists in DC2"
-curl -sL $ADDRESS_DC2/v1/kv/backup/testkey | grep -q "ZG9uJ3QgZGVsZXRl"
+curl -sL $ADDRESS_DC2/v1/kv/backup/excluded_key | grep -q "ZG9uJ3QgZGVsZXRl"
 
 rm -rf $DATADIR_DC1
 rm -rf $DATADIR_DC2
