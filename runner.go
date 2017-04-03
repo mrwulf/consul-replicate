@@ -396,6 +396,7 @@ func (r *Runner) replicate(prefix *Prefix, excludes []*Exclude, excludematches [
 	}
 	for _, key := range localKeys {
 		excluded := false
+    excludematched := false
 
 		// Ignore if the key falls under an excluded prefix
 		if len(excludes) > 0 {
@@ -410,7 +411,7 @@ func (r *Runner) replicate(prefix *Prefix, excludes []*Exclude, excludematches [
 		}
 
     // Ignore if the key falls under an excluded match path
-		if len(excludematches) > 0 {
+		if !excluded && len(excludematches) > 0 {
 			sourceKey := strings.Replace(key, prefix.Destination, prefix.Source, -1)
 			for _, excludematch := range excludematches {
 				if strings.Contains(sourceKey, excludematch.Source) {
